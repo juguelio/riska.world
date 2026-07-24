@@ -102,9 +102,29 @@ export async function postVerifyPolicyHuman(request: Request) {
   }
 
   const walletSession = readWalletSession(cookies());
-  const allowsUnsignedBrowserWallet = expectedWorldIdEnvironment === "staging";
 
-  if (!walletSession && process.env.NODE_ENV === "production" && !allowsUnsignedBrowserWallet) {
+  // Escape hatch for browser-wallet sandboxes (World ID simulator / reviewer demo),
+  // where MiniKit Wallet Auth is unavailable so no SIWE session can ever exist.
+  //
+  // It is never OPENED implicitly: not by NODE_ENV, not by the World ID environment.
+  // That implicit widening was the original bypass — a staging/testnet deployment
+  // silently accepted an arbitrary holder address from the request body. It must be
+  // switched on deliberately, and it is off by default.
+  //
+  // It is always CLOSED in production: enabling it on a production build is ignored,
+  // so a stray env var can never re-open the bypass next to the real signing key.
+  const allowsUnsignedBrowserWallet =
+    process.env.RISKA_ALLOW_UNSIGNED_BROWSER_WALLET === "true" &&
+    process.env.NODE_ENV !== "production";
+
+  if (process.env.RISKA_ALLOW_UNSIGNED_BROWSER_WALLET === "true" && !allowsUnsignedBrowserWallet) {
+    console.error(
+      "[world-id] RISKA_ALLOW_UNSIGNED_BROWSER_WALLET is set on a production build and was " +
+        "IGNORED. The wallet session requirement stays enforced."
+    );
+  }
+
+  if (!walletSession && !allowsUnsignedBrowserWallet) {
     return NextResponse.json(
       {
         success: false,
@@ -112,6 +132,14 @@ export async function postVerifyPolicyHuman(request: Request) {
         error: "Wallet Auth session is required before World ID verification."
       },
       { status: 401 }
+    );
+  }
+
+  if (!walletSession) {
+    console.warn(
+      "[world-id] RISKA_ALLOW_UNSIGNED_BROWSER_WALLET is enabled: issuing a policy-human " +
+        "authorization without a verified wallet session. Never enable this with the " +
+        "production signing key."
     );
   }
 
@@ -151,6 +179,22 @@ export async function postVerifyPolicyHuman(request: Request) {
   );
 
   if (!policyHumanResponse) {
+    console.error("[world-id] no policy-human response matched the expected signal", {
+      deployment,
+      expectedIdentifier,
+      expectedProtocolVersion,
+      expectedSignalHash,
+      holderUsedForSignal: normalizedWallet,
+      sessionAddress: walletSession?.address ?? null,
+      bodyWalletAddress: walletAddress,
+      receivedResponses: responses.map((response) => ({
+        identifier: response.identifier,
+        signalHash: response.signal_hash,
+        signalHashMatches: response.signal_hash?.toLowerCase() === expectedSignalHash,
+        hasNullifier: typeof response.nullifier === "string" && response.nullifier.length > 0
+      }))
+    });
+
     return NextResponse.json(
       {
         success: false,
