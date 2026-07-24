@@ -1,16 +1,22 @@
 import { signRequest } from "@worldcoin/idkit/signing";
 import { NextResponse } from "next/server";
 
-import { RISKA_WORLD_ID_POLICY_ACTION } from "@/lib/world/idkit";
+import {
+  RISKA_WORLD_ID_POLICY_ACTION,
+  getWorldIdEnvironmentForDeployment,
+  type WorldIdDeployment
+} from "@/lib/world/idkit";
 import { requiredEnvironment } from "@/lib/world/server-env";
 
 type RpSignatureRequest = {
   action?: string;
+  deployment?: WorldIdDeployment;
 };
 
 export async function postRpSignature(request: Request) {
   const body = (await request.json().catch(() => null)) as RpSignatureRequest | null;
   const action = body?.action ?? RISKA_WORLD_ID_POLICY_ACTION;
+  const deployment: WorldIdDeployment = body?.deployment === "testnet" ? "testnet" : "production";
 
   if (action !== RISKA_WORLD_ID_POLICY_ACTION) {
     return NextResponse.json(
@@ -19,7 +25,17 @@ export async function postRpSignature(request: Request) {
     );
   }
 
-  const env = requiredEnvironment(["WORLD_ID_RP_ID", "RP_SIGNING_KEY"]);
+  // The RP is registered per environment in the Developer Portal. Signing a
+  // staging request with the production RP yields a production request, which the
+  // World ID simulator rejects outright. Prefer the staging RP when the deployment
+  // is staging, and fall back to the single RP so existing setups keep working.
+  const wantsStaging = getWorldIdEnvironmentForDeployment(deployment) === "staging";
+  const stagingEnv = wantsStaging
+    ? requiredEnvironment(["WORLD_ID_RP_ID_STAGING", "RP_SIGNING_KEY_STAGING"])
+    : null;
+  const env = stagingEnv
+    ? { WORLD_ID_RP_ID: stagingEnv.WORLD_ID_RP_ID_STAGING, RP_SIGNING_KEY: stagingEnv.RP_SIGNING_KEY_STAGING }
+    : requiredEnvironment(["WORLD_ID_RP_ID", "RP_SIGNING_KEY"]);
 
   if (!env) {
     return NextResponse.json(

@@ -95,13 +95,22 @@ function readDeploymentEnv(environment: "production" | "testnet"): RiskaTestnetD
     return null;
   }
 
+  // The enrollment flow discards a policy-human authorization whose verifier does
+  // not match the configured one, and treats a missing verifier as a mismatch. So
+  // omitting it here silently bounces every verified user back to the identity
+  // step. Read it alongside the contracts so an env-configured deployment works.
+  const policyHumanVerifier = normalizeOptionalAddress(
+    process.env[`${prefix}_POLICY_HUMAN_VERIFIER${suffix}`]
+  );
+
   return {
     environment,
     chainId: String(isProduction ? WORLDCHAIN_CHAIN_ID : WORLDCHAIN_SEPOLIA_CHAIN_ID),
     contracts,
     explorerBaseUrl: isProduction ? WORLDCHAIN_EXPLORER_URL : WORLDCHAIN_SEPOLIA_EXPLORER_URL,
     network: isProduction ? "worldchain" : "worldchainSepolia",
-    rpcUrl: isProduction ? WORLDCHAIN_RPC_URL : WORLDCHAIN_SEPOLIA_RPC_URL
+    rpcUrl: isProduction ? WORLDCHAIN_RPC_URL : WORLDCHAIN_SEPOLIA_RPC_URL,
+    ...(policyHumanVerifier ? { policyHumanVerifier } : {})
   };
 }
 

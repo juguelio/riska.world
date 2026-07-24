@@ -94,7 +94,7 @@ export function WorldIdGate({
     : proofOfHuman({ signal: worldIdSignal });
   const { isInstalled } = useMiniKit();
   const copy = t.worldIdGate;
-  const worldAppId = getWorldAppId();
+  const worldAppId = getWorldAppId(environment);
 
   const [status, setStatus] = useState<GateStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -148,8 +148,15 @@ export function WorldIdGate({
       return;
     }
 
-    const rewriteSimulatorLinks = () => {
-      document.querySelectorAll<HTMLAnchorElement>('a[href^="https://simulator.worldcoin.org"]').forEach((link) => {
+    // The IDKit widget renders its simulator callout inside a shadow root, so a
+    // plain document.querySelectorAll never sees the link. Walk open shadow roots
+    // too, and observe each one, otherwise this rewrite silently does nothing and
+    // the callout keeps opening the simulator's default identity instead of its
+    // identity selector.
+    const observers: MutationObserver[] = [];
+
+    const rewriteIn = (root: Document | ShadowRoot) => {
+      root.querySelectorAll<HTMLAnchorElement>('a[href^="https://simulator.worldcoin.org"]').forEach((link) => {
         const identitySelectorUrl = getWorldIdSimulatorIdentitySelectorUrl(link.href);
 
         if (identitySelectorUrl && link.href !== identitySelectorUrl) {
@@ -158,16 +165,57 @@ export function WorldIdGate({
       });
     };
 
-    rewriteSimulatorLinks();
-    const observer = new MutationObserver(rewriteSimulatorLinks);
-    observer.observe(document.body, {
+    const collectRoots = (root: Document | ShadowRoot, found: Array<Document | ShadowRoot>) => {
+      found.push(root);
+      root.querySelectorAll<HTMLElement>("*").forEach((element) => {
+        if (element.shadowRoot) {
+          collectRoots(element.shadowRoot, found);
+        }
+      });
+    };
+
+    const sweep = () => {
+      const roots: Array<Document | ShadowRoot> = [];
+      collectRoots(document, roots);
+      roots.forEach(rewriteIn);
+    };
+
+    sweep();
+
+    // Re-sweep on any mutation: the widget mounts its shadow root asynchronously,
+    // and new roots can appear after the first pass.
+    const rootObserver = new MutationObserver(sweep);
+    rootObserver.observe(document.body, {
       attributeFilter: ["href"],
       attributes: true,
       childList: true,
       subtree: true
     });
+    observers.push(rootObserver);
 
-    return () => observer.disconnect();
+    const shadowRoots: Array<Document | ShadowRoot> = [];
+    collectRoots(document, shadowRoots);
+    shadowRoots.forEach((root) => {
+      if (root === document) {
+        return;
+      }
+
+      const observer = new MutationObserver(sweep);
+      observer.observe(root as ShadowRoot, {
+        attributeFilter: ["href"],
+        attributes: true,
+        childList: true,
+        subtree: true
+      });
+      observers.push(observer);
+    });
+
+    const interval = window.setInterval(sweep, 400);
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+      window.clearInterval(interval);
+    };
   }, [isOpen, worldIdEnvironment]);
 
   const resolveWorldIdError = useCallback(
@@ -211,7 +259,7 @@ export function WorldIdGate({
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ action: RISKA_WORLD_ID_POLICY_ACTION })
+        body: JSON.stringify({ action: RISKA_WORLD_ID_POLICY_ACTION, deployment: environment })
       });
     } catch {
       setStatus("error");
@@ -233,6 +281,7 @@ export function WorldIdGate({
     copy.configMissing,
     copy.signatureError,
     copy.walletRequired,
+    environment,
     isInstalled,
     resolveWorldIdError,
     walletAddress,
