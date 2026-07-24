@@ -121,7 +121,6 @@ const pendingWalletStorageKey = "riska.pending-wallet-session";
 const beneficiaryColors = ["bg-rose-500", "bg-amber-500", "bg-emerald-500", "bg-cyan-500", "bg-violet-500"];
 
 const steps: WizardStep[] = [
-  { accent: "bg-[#5868ea]", icon: Fingerprint, id: "identity" },
   { accent: "bg-[#5868ea]", icon: Users, id: "beneficiaries" },
   { accent: "bg-[#5868ea]", icon: FileCheck2, id: "confirm" }
 ];
@@ -648,7 +647,7 @@ export function RiskaEnrollmentHome({ view = "home" }: { view?: "apply" | "home"
   const { language } = useLanguage();
   const { environment } = useEnvironment();
   const content = copy[language];
-  const [activeStepId, setActiveStepId] = useState<StepId>("identity");
+  const [activeStepId, setActiveStepId] = useState<StepId>("beneficiaries");
   const [hydrated, setHydrated] = useState(false);
   const [existingPolicyLookup, setExistingPolicyLookup] = useState<ExistingPolicyLookupState>({ status: "idle" });
   const [testnetDeployment, setTestnetDeployment] = useState<TestnetDeploymentState>({ status: "loading" });
@@ -810,7 +809,7 @@ export function RiskaEnrollmentHome({ view = "home" }: { view?: "apply" | "home"
 
     if (!matchesCurrentAuthorization || isHumanReservationExpired(reservation)) {
       setState((current) => ({ ...clearSubmission(current), humanReservation: null }));
-      setActiveStepId("identity");
+      setActiveStepId("beneficiaries");
     }
   }, [environment, hydrated, state.humanReservation, testnetDeployment]);
 
@@ -823,7 +822,7 @@ export function RiskaEnrollmentHome({ view = "home" }: { view?: "apply" | "home"
     const intervalId = window.setInterval(() => {
       if (isHumanReservationExpired(reservation)) {
         setState((current) => ({ ...clearSubmission(current), humanReservation: null }));
-        setActiveStepId("identity");
+        setActiveStepId("beneficiaries");
       }
     }, 60_000);
 
@@ -892,7 +891,7 @@ export function RiskaEnrollmentHome({ view = "home" }: { view?: "apply" | "home"
     });
 
     if (humanReservation) {
-      setActiveStepId("beneficiaries");
+      setActiveStepId("confirm");
     }
   }, []);
 
@@ -953,7 +952,7 @@ export function RiskaEnrollmentHome({ view = "home" }: { view?: "apply" | "home"
     if (activeStep.id === "confirm") {
       if (state.humanReservation && isHumanReservationExpired(state.humanReservation)) {
         setState((current) => ({ ...clearSubmission(current), humanReservation: null }));
-        setActiveStepId("identity");
+        setActiveStepId("beneficiaries");
         return;
       }
 
@@ -1019,7 +1018,7 @@ export function RiskaEnrollmentHome({ view = "home" }: { view?: "apply" | "home"
       <main className="pb-28">
         {view === "home" && <WelcomeScreen content={content} onStartApplication={startApplication} />}
 
-        {view === "apply" && <section id="enroll" className={`mx-auto px-5 py-10 md:px-8 lg:py-14 ${state.issuedPolicyId ? "max-w-6xl" : "max-w-3xl"}`}>
+        {view === "apply" && hydrated && <section id="enroll" className={`mx-auto px-5 py-10 md:px-8 lg:py-14 ${state.issuedPolicyId ? "max-w-6xl" : "max-w-3xl"}`}>
           <div className="space-y-4">
             {!state.issuedPolicyId && (
               <StepRail
@@ -1311,7 +1310,7 @@ function EnrollmentWizard(props: EnrollmentWizardProps) {
           </p>
         )}
 
-        {!state.issuedPolicyId && !(step.id === "identity" && state.walletSession) && (
+        {!state.issuedPolicyId && (
           <div className="mt-7 flex flex-col-reverse gap-3 border-t border-[#202936] pt-5 sm:flex-row sm:items-center sm:justify-between">
             <button
               className="flex h-12 items-center justify-center gap-2 rounded-xl border border-[#334052] bg-[#151d28] px-5 text-sm font-semibold text-[#e6edf8] transition hover:border-[#5868ea] hover:text-[#aeb8ff] disabled:cursor-not-allowed disabled:opacity-40"
@@ -1340,8 +1339,6 @@ function EnrollmentWizard(props: EnrollmentWizardProps) {
 
 function renderScreen(props: EnrollmentWizardProps) {
   switch (props.step.id) {
-    case "identity":
-      return <IdentityScreen {...props} />;
     case "beneficiaries":
       return <BeneficiariesScreen {...props} />;
     case "quote":
@@ -1351,33 +1348,11 @@ function renderScreen(props: EnrollmentWizardProps) {
   }
 }
 
-function IdentityScreen({
-  onHumanReservationChange,
-  onWalletSessionChange,
-  state
-}: EnrollmentWizardProps) {
-  if (state.walletSession) {
-    return (
-      <WorldIdGate
-        onReservationChange={onHumanReservationChange}
-        reservation={state.humanReservation}
-        variant="compact"
-        walletAddress={state.walletSession.address}
-      />
-    );
-  }
-
-  return (
-    <div>
-      <WalletAuth initialSession={state.walletSession} onSessionChange={onWalletSessionChange} variant="dark" />
-    </div>
-  );
-}
-
 function BeneficiariesScreen({
   beneficiaryTotal,
   content,
   onAddBeneficiary,
+  onWalletSessionChange,
   onRemoveBeneficiary,
   onSkipBeneficiaries,
   onUpdateBeneficiary,
@@ -1385,6 +1360,10 @@ function BeneficiariesScreen({
 }: EnrollmentWizardProps) {
   const text = content.wizard.beneficiaries;
   const hasWalletError = state.beneficiaries.some((beneficiary) => !isWalletAddress(beneficiary.wallet));
+
+  if (!state.walletSession) {
+    return <WalletAuth initialSession={state.walletSession} onSessionChange={onWalletSessionChange} variant="dark" />;
+  }
 
   return (
     <div className="space-y-4">
@@ -1463,6 +1442,7 @@ function ConfirmScreen({
   completion,
   content,
   existingPolicyLookup,
+  onHumanReservationChange,
   onSetState,
   state,
   testnetDeployment,
@@ -1484,6 +1464,22 @@ function ConfirmScreen({
           state={state}
           testnetDeployment={testnetDeployment}
           testnetIssue={testnetIssue}
+        />
+      </div>
+    );
+  }
+
+  if (!state.humanReservation && state.walletSession) {
+    return (
+      <div className="space-y-5">
+        <p className="text-sm leading-6 text-[#b7c3d5]">
+          Verifica tu identidad antes de abrir la póliza.
+        </p>
+        <WorldIdGate
+          onReservationChange={onHumanReservationChange}
+          reservation={state.humanReservation}
+          variant="compact"
+          walletAddress={state.walletSession.address}
         />
       </div>
     );

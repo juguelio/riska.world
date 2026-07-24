@@ -57,11 +57,11 @@ test("persists a verified human session after reload", async ({ page }) => {
   await restoreEnrollment(page);
   await page.goto("/apply");
 
-  await expect(page.getByText("Humano verificado")).toBeVisible();
-  await expect(page.getByText("Humano único verificado. Esta wallet puede continuar a beneficiarios.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
+  await expect(page.getByText("Humano único verificado. Esta wallet puede continuar a beneficiarios.")).not.toBeVisible();
 
   await page.reload();
-  await expect(page.getByText("Humano único verificado. Esta wallet puede continuar a beneficiarios.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
 });
 
 test("invalidates an expired saved human authorization before enrollment can continue", async ({ page }) => {
@@ -73,7 +73,7 @@ test("invalidates an expired saved human authorization before enrollment can con
   }));
   await page.goto("/apply");
 
-  await expect(page.getByRole("button", { name: "Verificar que soy humano" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => {
     const restored = JSON.parse(window.localStorage.getItem("riska.enrollment.v2") ?? "{}");
     return restored.humanReservation;
@@ -96,7 +96,7 @@ test("consumes a pending wallet redirect only once", async ({ page }) => {
   }, enrollment.walletSession);
   await page.goto("/apply");
 
-  await expect(page.getByRole("button", { name: "Verificar que soy humano" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.sessionStorage.getItem("riska.pending-wallet-session"))).toBeNull();
 
   await page.evaluate((enrollment) => {
@@ -104,7 +104,7 @@ test("consumes a pending wallet redirect only once", async ({ page }) => {
   }, enrollment);
   await page.reload();
 
-  await expect(page.getByText("Humano único verificado. Esta wallet puede continuar a beneficiarios.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
 });
 
 test("keeps three distinct wallet and World ID reservations independent", async ({ page }) => {
@@ -118,12 +118,21 @@ test("keeps three distinct wallet and World ID reservations independent", async 
 
   for (const identity of identities) {
     const enrollment = enrollmentForIdentity(identity);
+    await page.waitForTimeout(100);
     await page.evaluate((state) => {
       window.localStorage.setItem("riska.enrollment.v2", JSON.stringify(state));
     }, enrollment);
     await page.reload();
 
-    await expect(page.getByText("Humano único verificado. Esta wallet puede continuar a beneficiarios.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => {
+      const restored = JSON.parse(window.localStorage.getItem("riska.enrollment.v2") ?? "{}");
+      return restored.walletSession?.address ?? null;
+    })).toBe(identity.address);
+    await expect.poll(() => page.evaluate(() => {
+      const restored = JSON.parse(window.localStorage.getItem("riska.enrollment.v2") ?? "{}");
+      return restored.humanReservation?.walletAddress ?? null;
+    })).toBe(identity.address);
     const restored = await page.evaluate(() => JSON.parse(window.localStorage.getItem("riska.enrollment.v2") ?? "{}"));
     expect(restored.walletSession.address.toLowerCase()).toBe(identity.address.toLowerCase());
     expect(restored.humanReservation.walletAddress.toLowerCase()).toBe(identity.address.toLowerCase());
@@ -140,7 +149,7 @@ test("invalidates a saved authorization when the policy verifier changes", async
   }));
   await page.goto("/apply");
 
-  await expect(page.getByRole("button", { name: "Verificar que soy humano" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Beneficiarios", exact: true })).toBeVisible();
   await expect(page.getByText("Humano único verificado. Esta wallet puede continuar a beneficiarios.")).not.toBeVisible();
 });
 
