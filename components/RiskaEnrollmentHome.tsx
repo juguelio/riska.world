@@ -35,6 +35,7 @@ import { Footer } from "@/components/Footer";
 import { useLanguage } from "@/components/LanguageProvider";
 import { Navbar } from "@/components/Navbar";
 import { useEnvironment } from "@/components/NetworkEnvironment";
+import { RiskaLogo } from "@/components/RiskaLogo";
 import { WalletAuth, type WalletAuthSession } from "@/components/WalletAuth";
 import { WorldIdGate, type PolicyHumanReservationView } from "@/components/WorldIdGate";
 import type { Language } from "@/lib/i18n";
@@ -1143,16 +1144,21 @@ function WelcomeScreen({
   return (
     <section className="relative isolate overflow-hidden px-5 pb-32 pt-12 md:px-8 md:pt-24">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_16%,rgba(88,104,234,0.22),transparent_29%),radial-gradient(circle_at_84%_25%,rgba(45,212,191,0.12),transparent_26%)]" />
-      <div className="pointer-events-none absolute left-[8%] top-16 -z-10 h-56 w-56 rounded-full border border-[#5868ea]/15" />
-      <div className="pointer-events-none absolute right-[8%] top-36 -z-10 h-80 w-80 rounded-full border border-aurora-500/10" />
+      <RiskaLogo
+        className="pointer-events-none absolute left-[4%] top-20 -z-10 opacity-[0.08]"
+        markClassName="h-64 w-64"
+        showWordmark={false}
+      />
+      <RiskaLogo
+        className="pointer-events-none absolute right-[8%] top-36 -z-10 opacity-[0.06]"
+        markClassName="h-80 w-80"
+        showWordmark={false}
+      />
 
       <div className="mx-auto grid min-h-[calc(100vh-12rem)] max-w-6xl items-center gap-12 md:grid-cols-[1.1fr_0.9fr] md:gap-16">
         <div className="max-w-2xl space-y-8">
           <div className="flex items-center gap-3 text-xs font-semibold tracking-[0.22em] text-[#aeb8ff]">
-            <span className="relative grid h-8 w-8 place-items-center rounded-full border border-[#5868ea]/50 bg-[#5868ea]/10">
-              <span className="absolute h-3 w-3 rounded-full border border-aurora-500" />
-              <span className="h-1.5 w-1.5 rounded-full bg-aurora-500 shadow-glow" />
-            </span>
+            <RiskaLogo markClassName="h-8 w-8" showWordmark={false} />
             {welcome.badge}
           </div>
 

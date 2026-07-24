@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Home, LogOut, ShieldCheck } from "lucide-react";
+import { BookOpen, LogOut, ShieldCheck } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { EnvironmentSwitcher, useEnvironment } from "@/components/NetworkEnvironment";
+import { RiskaLogo } from "@/components/RiskaLogo";
 import { disconnectWallet } from "@/lib/web3/metamask";
 
 const enrollmentStorageKey = "riska.enrollment.v2";
@@ -32,7 +33,7 @@ export function Navbar() {
   const contracts = t.navbar.links.find((link) => link.href === "/docs");
   const [hasWalletSession, setHasWalletSession] = useState(false);
   const items = [
-    { href: "/", icon: Home, label: t.navbar.brand },
+    { href: "/", label: t.navbar.brand, logo: true },
     { href: "/rules", icon: ShieldCheck, label: rules?.label ?? "Rules" },
     { href: "/docs", icon: BookOpen, label: contracts?.label ?? "Docs" }
   ];
@@ -73,7 +74,6 @@ export function Navbar() {
       </div>
       <nav className="mx-auto flex max-w-lg items-center justify-between rounded-[24px] border border-[#303a49] bg-[#10151d]/95 px-2 py-2 shadow-[0_12px_40px_rgba(8,11,16,0.4)] backdrop-blur-xl">
         {items.map((item) => {
-          const Icon = item.icon;
           const selected = pathname === item.href;
 
           return (
@@ -87,7 +87,7 @@ export function Navbar() {
               href={item.href}
               key={item.href}
             >
-              <Icon className="h-4 w-4" strokeWidth={2.2} />
+              {item.logo ? <RiskaLogo markClassName="h-4 w-4" showWordmark={false} /> : item.icon && <item.icon className="h-4 w-4" strokeWidth={2.2} />}
               <span className="truncate">{item.label}</span>
             </Link>
           );

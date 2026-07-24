@@ -12,7 +12,10 @@ export const metadata: Metadata = {
   title: metadataDictionary.title,
   description: metadataDictionary.description,
   icons: {
-    icon: "/favicon.ico"
+    icon: [
+      { url: "/riska-mark.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", type: "image/x-icon" }
+    ]
   }
 };
 

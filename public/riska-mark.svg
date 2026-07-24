@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>RISKA mark</title>
+  <desc>Geometric protective seal with an abstract R</desc>
+  <defs>
+    <linearGradient id="riska-indigo-teal" x1="18" y1="16" x2="110" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5868EA"/>
+      <stop offset="0.52" stop-color="#5868EA"/>
+      <stop offset="0.53" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+  </defs>
+  <path d="M62 12 22 35v45l40 28 40-28V35L62 12Z" stroke="url(#riska-indigo-teal)" stroke-width="8" stroke-linejoin="miter"/>
+  <path d="M62 12v13M22 35l12 7M102 35l-12 7M22 80l12-7M102 80 90 73" stroke="#080B10" stroke-width="10" stroke-linecap="square"/>
+  <path d="M40 42h25c9 0 14 4 14 11s-5 11-14 11H48m10 0 22 25" stroke="#2DD4BF" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M40 42v47" stroke="#5868EA" stroke-width="8" stroke-linecap="square"/>
+</svg>
