@@ -1185,7 +1185,7 @@ function WelcomeScreen({
             {welcome.walletEyebrow}
           </p>
           <div className="glass-panel p-2 md:p-3">
-            <WalletAuth onSessionChange={onStartApplication} />
+            <WalletAuth onSessionChange={onStartApplication} showWorldIdGate={false} />
           </div>
         </div>
       </div>
