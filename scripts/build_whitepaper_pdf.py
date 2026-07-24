@@ -2,10 +2,7 @@
 from __future__ import annotations
 
 import re
-import sys
 from pathlib import Path
-
-sys.path.insert(0, "/tmp/codex_pdf_build")
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT

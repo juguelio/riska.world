@@ -98,9 +98,8 @@ export async function postVerifyPolicyHuman(request: Request) {
   }
 
   const walletSession = readWalletSession(cookies());
-  const allowsUnsignedBrowserWallet = RISKA_WORLD_ID_ENVIRONMENT === "staging";
 
-  if (!walletSession && process.env.NODE_ENV === "production" && !allowsUnsignedBrowserWallet) {
+  if (!walletSession) {
     return NextResponse.json(
       {
         success: false,
@@ -114,7 +113,7 @@ export async function postVerifyPolicyHuman(request: Request) {
   let normalizedWallet: string;
 
   try {
-    normalizedWallet = getAddress(walletSession?.address ?? walletAddress);
+    normalizedWallet = getAddress(walletSession.address);
   } catch {
     return NextResponse.json(
       { success: false, error: "Invalid wallet address for World ID signal." },
