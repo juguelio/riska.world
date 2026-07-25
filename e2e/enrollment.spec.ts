@@ -3,7 +3,9 @@ import { expect, test, type Page } from "@playwright/test";
 const holder = "0x99d58aa8dd8311c3706d619176bb3bf2008148c3";
 const beneficiaryA = "0x1111111111111111111111111111111111111111";
 const beneficiaryB = "0x2222222222222222222222222222222222222222";
-const policyManager = "0xeBB2dd0A8C59D2e1745eb94BF6f1714AfAb11673";
+// Keep saved-authorization fixtures aligned with the active Sepolia deployment.
+// The app intentionally clears reservations created for a different manager.
+const policyManager = "0xF704cdEFd1aC8F294FE48b491ac8fB6278fD1077";
 
 function verifiedEnrollment(overrides: Record<string, unknown> = {}) {
   return {

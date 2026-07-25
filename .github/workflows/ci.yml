@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build, contracts, and enrollment flow
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_WORLD_APP_ID: app_riska_e2e
+      NEXT_PUBLIC_WORLD_ID_POLICY_ACTION: riska-policy-human-v1
+      POLICY_HUMAN_SIGNING_KEY: "0x1111111111111111111111111111111111111111111111111111111111111111"
+      RISKA_SESSION_SECRET: riska-e2e-session-secret
+      RP_SIGNING_KEY: "0x2222222222222222222222222222222222222222222222222222222222222222"
+      WORLD_ID_RP_ID: rp_riska_e2e
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run contract and web3 tests
+        run: |
+          npm run test:policy-human
+          npm run test:web3
+          npm run contracts:test
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Run enrollment end-to-end tests
+        run: npm run test:e2e
