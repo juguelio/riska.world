@@ -409,6 +409,7 @@ export const dictionaries = {
       title: "Build Riska in public, milestone by milestone.",
       subtitle:
         "A transparent roadmap for turning the Riska prototype into a safe, useful, and widely accessible protection product.",
+      scrollHint: "Swipe to explore",
       status: { complete: "Completed", current: "In progress", upcoming: "Next" },
       items: [
         {
@@ -879,6 +880,7 @@ export const dictionaries = {
       title: "Construimos Riska en público, milestone a milestone.",
       subtitle:
         "Una hoja de ruta transparente para convertir el prototipo de Riska en un producto de protección seguro, útil y accesible.",
+      scrollHint: "Deslizá para explorar",
       status: { complete: "Completado", current: "En curso", upcoming: "Siguiente" },
       items: [
         {
