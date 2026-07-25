@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 
-import { ContractsSection } from "@/components/ContractsSection";
 import { useLanguage } from "@/components/LanguageProvider";
+import { MilestonesSection } from "@/components/MilestonesSection";
 
 export function DocsContent() {
   const { t } = useLanguage();
@@ -23,7 +23,7 @@ export function DocsContent() {
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4 sm:justify-start">
           <a
-            href="#contracts"
+            href="#milestones"
             className="rounded-lg border border-[#5868ea] bg-[#5868ea] px-5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-[#4f63e8] hover:text-white"
           >
             {docsPage.hero.primaryCta}
@@ -37,7 +37,7 @@ export function DocsContent() {
         </div>
       </section>
       <div className="mt-4">
-        <ContractsSection />
+        <MilestonesSection />
       </div>
     </div>
   );

@@ -255,7 +255,7 @@ export const dictionaries = {
         { href: "/apply", label: "Enroll" },
         { href: "/rules", label: "Policy rules" },
         { href: "/whitepaper", label: "White paper" },
-        { href: "/docs", label: "Contracts" }
+        { href: "/docs", label: "Milestones" }
       ],
       cta: "Start",
       languageToggle: { label: "ES", ariaLabel: "Switch to Spanish" }
@@ -404,6 +404,57 @@ export const dictionaries = {
         { id: "premiumVault", name: "PremiumVault", description: "Holds USDC and auxiliary ERC20 tokens, then releases holder or beneficiary payouts." }
       ]
     },
+    milestones: {
+      eyebrow: "Roadmap & grants",
+      title: "Build Riska in public, milestone by milestone.",
+      subtitle:
+        "A transparent roadmap for turning the Riska prototype into a safe, useful, and widely accessible protection product.",
+      status: { complete: "Completed", current: "In progress", upcoming: "Next" },
+      items: [
+        {
+          phase: "01 · Foundation",
+          title: "Define the promise",
+          description: "Make protection, programmed income, and beneficiary rules understandable before scaling the product.",
+          deliverables: ["Product thesis and white paper", "Clear policy rules", "Grant-ready narrative"],
+          status: "complete"
+        },
+        {
+          phase: "02 · Testnet",
+          title: "Prove the lifecycle",
+          description: "Ship a working World Chain Sepolia experience that lets verified humans test the full policy flow.",
+          deliverables: ["Wallet + World ID onboarding", "Beneficiaries and policy funding", "Holder and death-claim flows"],
+          status: "complete"
+        },
+        {
+          phase: "03 · Validation",
+          title: "Learn with real people",
+          description: "Invite verified users and grant reviewers to test the experience, surface trust gaps, and measure completion.",
+          deliverables: ["User testing cohort", "Feedback and trust metrics", "Improved onboarding"],
+          status: "current"
+        },
+        {
+          phase: "04 · Readiness",
+          title: "Earn production trust",
+          description: "Build the operational, legal, security, and liquidity foundations required before real funds are considered.",
+          deliverables: ["External contract audit", "Legal and risk review", "Multisig, monitoring, and controls"],
+          status: "upcoming"
+        },
+        {
+          phase: "05 · Mini App",
+          title: "Reach more humans",
+          description: "Package the product for World App distribution and make protection accessible through a focused mobile-first flow.",
+          deliverables: ["World App release path", "Persistent policy experience", "Support and incident processes"],
+          status: "upcoming"
+        },
+        {
+          phase: "06 · Ecosystem",
+          title: "Grow responsibly",
+          description: "Expand partners, strategies, and governance only after the core protection experience is trusted and measurable.",
+          deliverables: ["World Chain production pilot", "Partner and yield integrations", "Progressive decentralization"],
+          status: "upcoming"
+        }
+      ]
+    },
     contractDetail: {
       backLabel: "Back to contracts",
       eyebrow: "Contract documentation",
@@ -422,14 +473,14 @@ export const dictionaries = {
     contractDocs: contractDocsEn,
     docsPage: {
       metadata: {
-        title: "Riska protocol docs",
-        description: "Review deployed contracts, internal documentation, and integration entry points for Riska."
+        title: "Riska roadmap and milestones",
+        description: "Follow Riska's public roadmap from testnet prototype to grants, production readiness, and World App adoption."
       },
       hero: {
-        badge: "Documentation",
-        title: "Build with the Riska protocol",
-        description: "Explore contract addresses, integration resources, and references for partners shipping on World Chain.",
-        primaryCta: "View contract addresses",
+        badge: "Roadmap and milestones",
+        title: "Build Riska with us.",
+        description: "See what is complete, what we are validating now, and how grants help move Riska from a testnet prototype to a trusted protection product.",
+        primaryCta: "View milestones",
         secondaryCta: "Open white paper"
       }
     },
@@ -690,7 +741,7 @@ export const dictionaries = {
         { href: "/apply", label: "Inscripción" },
         { href: "/rules", label: "Reglas" },
         { href: "/whitepaper", label: "White paper" },
-        { href: "/docs", label: "Contratos" }
+        { href: "/docs", label: "Milestones" }
       ],
       cta: "Empezar",
       languageToggle: { label: "EN", ariaLabel: "Switch to English" }
@@ -823,6 +874,57 @@ export const dictionaries = {
         { id: "premiumVault", name: "PremiumVault", description: "Custodia USDC y tokens ERC20 auxiliares, y libera los pagos al titular o a los beneficiarios." }
       ]
     },
+    milestones: {
+      eyebrow: "Roadmap y grants",
+      title: "Construimos Riska en público, milestone a milestone.",
+      subtitle:
+        "Una hoja de ruta transparente para convertir el prototipo de Riska en un producto de protección seguro, útil y accesible.",
+      status: { complete: "Completado", current: "En curso", upcoming: "Siguiente" },
+      items: [
+        {
+          phase: "01 · Fundamentos",
+          title: "Definir la promesa",
+          description: "Hacer comprensibles la protección, la renta programada y las reglas para beneficiarios antes de escalar.",
+          deliverables: ["Tesis y white paper", "Reglas claras de la póliza", "Narrativa para grants"],
+          status: "complete"
+        },
+        {
+          phase: "02 · Testnet",
+          title: "Probar el ciclo completo",
+          description: "Ofrecer una experiencia funcional en World Chain Sepolia para probar todo el ciclo de la póliza.",
+          deliverables: ["Onboarding con wallet + World ID", "Beneficiarios y fondeo", "Flujos de titular y fallecimiento"],
+          status: "complete"
+        },
+        {
+          phase: "03 · Validación",
+          title: "Aprender con personas reales",
+          description: "Invitar usuarios verificados y revisores de grants a probar la experiencia y medir dónde se pierde la confianza.",
+          deliverables: ["Cohorte de pruebas", "Feedback y métricas de confianza", "Onboarding mejorado"],
+          status: "current"
+        },
+        {
+          phase: "04 · Preparación",
+          title: "Ganar confianza productiva",
+          description: "Construir las bases legales, operativas, de seguridad y liquidez necesarias antes de considerar fondos reales.",
+          deliverables: ["Auditoría externa", "Revisión legal y de riesgos", "Multisig, monitoreo y controles"],
+          status: "upcoming"
+        },
+        {
+          phase: "05 · Mini App",
+          title: "Llegar a más humanos",
+          description: "Preparar la distribución en World App con un flujo móvil, claro y enfocado en protección.",
+          deliverables: ["Camino de lanzamiento en World App", "Experiencia persistente", "Soporte e incidentes"],
+          status: "upcoming"
+        },
+        {
+          phase: "06 · Ecosistema",
+          title: "Crecer responsablemente",
+          description: "Ampliar partners, estrategias y gobernanza solo después de validar la experiencia principal.",
+          deliverables: ["Piloto productivo en World Chain", "Partners e integraciones de yield", "Descentralización progresiva"],
+          status: "upcoming"
+        }
+      ]
+    },
     contractDetail: {
       backLabel: "Volver a contratos",
       eyebrow: "Documentación del contrato",
@@ -841,14 +943,14 @@ export const dictionaries = {
     contractDocs: contractDocsEs,
     docsPage: {
       metadata: {
-        title: "Documentación del protocolo Riska",
-        description: "Consulta las direcciones de los contratos, la documentación interna y los puntos de integración de Riska."
+        title: "Roadmap y milestones de Riska",
+        description: "Conocé la hoja de ruta pública de Riska: desde el prototipo de testnet hasta los grants, la preparación productiva y World App."
       },
       hero: {
-        badge: "Documentación",
-        title: "Construye con el protocolo Riska",
-        description: "Explora las direcciones de los contratos, los recursos de integración y las referencias para World Chain.",
-        primaryCta: "Ver contratos",
+        badge: "Roadmap y milestones",
+        title: "Construyamos Riska juntos.",
+        description: "Mirá qué ya está completo, qué estamos validando ahora y cómo los grants ayudan a convertir Riska de un prototipo de testnet en un producto de protección confiable.",
+        primaryCta: "Ver milestones",
         secondaryCta: "Abrir white paper"
       }
     },
