@@ -1,5 +1,6 @@
 export type WorldIdEnvironment = "production" | "staging";
 export type WorldIdDeployment = "production" | "prod-test" | "testnet";
+export type WorldIdVerificationMethod = "proof_of_human" | "selfie_check";
 
 export const RISKA_WORLD_ID_POLICY_ACTION =
   process.env.NEXT_PUBLIC_WORLD_ID_POLICY_ACTION ?? "riska-policy-human-v1";
@@ -20,6 +21,14 @@ export function getWorldAppId(): `app_${string}` | undefined {
 
 export function normalizeWorldIdSignal(walletAddress: string) {
   return walletAddress.toLowerCase();
+}
+
+export function getWorldIdCredentialIdentifiers(
+  deployment: WorldIdDeployment,
+  method: WorldIdVerificationMethod
+) {
+  if (method === "selfie_check") return ["face"] as const;
+  return deployment === "testnet" ? (["orb"] as const) : (["proof_of_human"] as const);
 }
 
 export function getWorldIdSimulatorIdentitySelectorUrl(href: string) {

@@ -6,6 +6,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { NextResponse } from "next/server";
 
 import {
+  getWorldIdCredentialIdentifiers,
   getWorldIdEnvironmentForDeployment,
   RISKA_WORLD_ID_POLICY_ACTION,
   normalizeWorldIdSignal
@@ -20,6 +21,7 @@ import { readWalletSession } from "@/lib/world/wallet-session";
 
 type VerifyPolicyHumanRequest = {
   deployment?: "production" | "testnet" | "prod-test";
+  verificationMethod?: "proof_of_human" | "selfie_check";
   idkitResponse?: IDKitResult;
   walletAddress?: string;
 };
@@ -71,8 +73,10 @@ export async function postVerifyPolicyHuman(request: Request) {
   }
 
   const action = "action" in idkitResponse ? idkitResponse.action : undefined;
-  const expectedProtocolVersion = deployment === "testnet" ? "3.0" : "4.0";
-  const expectedIdentifier = deployment === "testnet" ? "orb" : "proof_of_human";
+  const allowedIdentifiers = [
+    ...getWorldIdCredentialIdentifiers(deployment, "proof_of_human"),
+    ...getWorldIdCredentialIdentifiers(deployment, "selfie_check")
+  ];
 
   if (action !== RISKA_WORLD_ID_POLICY_ACTION) {
     return NextResponse.json(
@@ -88,14 +92,12 @@ export async function postVerifyPolicyHuman(request: Request) {
     );
   }
 
-  if (idkitResponse.protocol_version !== expectedProtocolVersion || "session_id" in idkitResponse) {
+  if (!(idkitResponse.protocol_version === "3.0" || idkitResponse.protocol_version === "4.0") || "session_id" in idkitResponse) {
     return NextResponse.json(
       {
         success: false,
         code: "world_id_proof_required",
-        error: deployment === "testnet"
-          ? "Riska TEST requires a World ID Orb simulator proof."
-          : "Riska PROD requires a World ID 4.0 uniqueness proof."
+        error: "Riska requires a valid Proof of Human, Orb, or Selfie Check proof."
       },
       { status: 400 }
     );
@@ -147,7 +149,7 @@ export async function postVerifyPolicyHuman(request: Request) {
   const policyHumanResponse = selectPolicyHumanResponse(
     responses,
     expectedSignalHash,
-    expectedIdentifier
+    allowedIdentifiers
   );
 
   if (!policyHumanResponse) {
@@ -156,6 +158,21 @@ export async function postVerifyPolicyHuman(request: Request) {
         success: false,
         code: "invalid_policy_human_proof",
         error: "World ID proof of human is missing or is not bound to the connected wallet."
+      },
+      { status: 400 }
+    );
+  }
+
+  const expectedProtocolVersion = policyHumanResponse.identifier?.toLowerCase() === "proof_of_human"
+    ? "4.0"
+    : "3.0";
+
+  if (idkitResponse.protocol_version !== expectedProtocolVersion) {
+    return NextResponse.json(
+      {
+        success: false,
+        code: "world_id_proof_required",
+        error: `The ${policyHumanResponse.identifier} credential must use World ID ${expectedProtocolVersion}.`
       },
       { status: 400 }
     );
@@ -271,7 +288,12 @@ export async function postVerifyPolicyHuman(request: Request) {
 
   const policyHumanSigner = privateKeyToAccount(signingKey);
   const authorization = await policyHumanSigner.signTypedData({
-    domain: { name: "RiskaPolicyManager", version: "1", chainId: 4801, verifyingContract: policyManager },
+    domain: {
+      name: "RiskaPolicyManager",
+      version: "1",
+      chainId: deployment === "production" ? 480 : 4801,
+      verifyingContract: policyManager
+    },
     types: { PolicyHumanAuthorization: [
       { name: "holder", type: "address" }, { name: "nullifierHash", type: "bytes32" }, { name: "deadline", type: "uint256" }
     ] },

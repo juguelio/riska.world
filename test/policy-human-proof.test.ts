@@ -42,6 +42,17 @@ test("selects a legacy Orb response only for the TEST credential", () => {
   ], signalHash, "proof_of_human"), undefined);
 });
 
+test("selects a Selfie Check face response when face is an allowed credential", () => {
+  const selected = selectPolicyHumanResponse([
+    { identifier: "face", nullifier: "0x05", signal_hash: signalHash }
+  ], signalHash, ["proof_of_human", "face"]);
+
+  assert.equal(selected?.identifier, "face");
+  assert.equal(selectPolicyHumanResponse([
+    { identifier: "face", nullifier: "0x06", signal_hash: signalHash }
+  ], signalHash, "proof_of_human"), undefined);
+});
+
 test("does not accept other legacy credential levels as policy-human proof", () => {
   const selected = selectPolicyHumanResponse([
     { identifier: "device", nullifier: "0x05", signal_hash: signalHash },

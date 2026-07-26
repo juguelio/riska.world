@@ -12,6 +12,7 @@ type VerifiedPolicyHumanResult = {
 };
 
 export type PolicyHumanIdentifier = "orb" | "proof_of_human";
+export type PolicyHumanVerificationIdentifier = PolicyHumanIdentifier | "face";
 
 export function normalizeNullifier(nullifier: string) {
   return BigInt(nullifier).toString(10);
@@ -20,14 +21,17 @@ export function normalizeNullifier(nullifier: string) {
 export function selectPolicyHumanResponse(
   responses: readonly PolicyHumanResponse[],
   expectedSignalHash: string,
-  expectedIdentifier: PolicyHumanIdentifier
+  expectedIdentifier: PolicyHumanVerificationIdentifier | readonly PolicyHumanVerificationIdentifier[]
 ) {
   const normalizedSignalHash = expectedSignalHash.toLowerCase();
+  const expectedIdentifiers = typeof expectedIdentifier === "string"
+    ? [expectedIdentifier.toLowerCase()]
+    : expectedIdentifier.map((identifier) => identifier.toLowerCase());
 
   return responses.find(
     (response) =>
       typeof response.identifier === "string" &&
-      response.identifier.toLowerCase() === expectedIdentifier &&
+      expectedIdentifiers.includes(response.identifier.toLowerCase()) &&
       typeof response.nullifier === "string" &&
       response.nullifier.length > 0 &&
       response.signal_hash?.toLowerCase() === normalizedSignalHash

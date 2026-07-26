@@ -563,6 +563,12 @@ export const dictionaries = {
       signatureError: "Unable to prepare the verification request.",
       verifyError: "Unable to verify the World ID proof.",
       duplicateError: "This verified human is already reserved for a Riska policy.",
+      methods: {
+        humanTitle: "Proof of Human / Orb",
+        humanDescription: "World ID uniqueness proof.",
+        selfieTitle: "Selfie Check",
+        selfieDescription: "Camera liveness and face continuity."
+      },
       errorPrefix: "Verification error:",
       errors: worldIdErrorsEn as Record<string, string>,
       signalLabel: (signal: string) => `Signal: ${signal}`,
@@ -1034,6 +1040,12 @@ export const dictionaries = {
       signatureError: "No se pudo crear la solicitud de verificación.",
       verifyError: "No se pudo verificar la prueba de World ID.",
       duplicateError: "Este humano verificado ya está reservado para una póliza Riska.",
+      methods: {
+        humanTitle: "Proof of Human / Orb",
+        humanDescription: "Prueba de unicidad de World ID.",
+        selfieTitle: "Selfie Check",
+        selfieDescription: "Liveness con cámara y continuidad facial."
+      },
       errorPrefix: "Error de verificación:",
       errors: worldIdErrorsEs as Record<string, string>,
       signalLabel: (signal: string) => `Señal: ${signal}`,

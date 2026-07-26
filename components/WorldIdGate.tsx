@@ -4,6 +4,7 @@ import {
   IDKitRequestWidget,
   orbLegacy,
   proofOfHuman,
+  selfieCheckLegacy,
   type IDKitResult,
   type RpContext
 } from "@worldcoin/idkit";
@@ -18,7 +19,8 @@ import {
   getWorldIdEnvironmentForDeployment,
   getWorldIdSimulatorIdentitySelectorUrl,
   getWorldAppId,
-  normalizeWorldIdSignal
+  normalizeWorldIdSignal,
+  type WorldIdVerificationMethod
 } from "@/lib/world/idkit";
 
 type GateStatus = "idle" | "loading" | "verified" | "error";
@@ -89,7 +91,10 @@ export function WorldIdGate({
   const { environment } = useEnvironment();
   const worldIdEnvironment = getWorldIdEnvironmentForDeployment(environment);
   const worldIdSignal = normalizeWorldIdSignal(walletAddress ?? "");
-  const worldIdPreset = environment === "testnet"
+  const [verificationMethod, setVerificationMethod] = useState<WorldIdVerificationMethod>("proof_of_human");
+  const worldIdPreset = verificationMethod === "selfie_check"
+    ? selfieCheckLegacy({ signal: worldIdSignal })
+    : environment === "testnet"
     ? orbLegacy({ signal: worldIdSignal })
     : proofOfHuman({ signal: worldIdSignal });
   const { isInstalled } = useMiniKit();
@@ -194,7 +199,7 @@ export function WorldIdGate({
       return;
     }
 
-    if (isInstalled && getMiniKitHumanCredentialStatus() === "unverified") {
+    if (verificationMethod === "proof_of_human" && isInstalled && getMiniKitHumanCredentialStatus() === "unverified") {
       setStatus("error");
       setError(resolveWorldIdError("credential_unavailable"));
       return;
@@ -235,6 +240,7 @@ export function WorldIdGate({
     copy.walletRequired,
     isInstalled,
     resolveWorldIdError,
+    verificationMethod,
     walletAddress,
     worldAppId
   ]);
@@ -253,6 +259,7 @@ export function WorldIdGate({
           },
           body: JSON.stringify({
             deployment: environment,
+            verificationMethod,
             idkitResponse: result,
             walletAddress
           })
@@ -288,7 +295,7 @@ export function WorldIdGate({
       onReservationChange?.(payload.reservation);
       setStatus("verified");
     },
-    [copy.duplicateError, environment, onReservationChange, resolveWorldIdError, walletAddress]
+    [copy.duplicateError, environment, onReservationChange, resolveWorldIdError, verificationMethod, walletAddress]
   );
 
   const handleSuccess = useCallback(() => {
@@ -299,6 +306,17 @@ export function WorldIdGate({
     }
     setStatus("verified");
     setError(null);
+  }, [onReservationChange]);
+
+  const selectVerificationMethod = useCallback((method: WorldIdVerificationMethod) => {
+    setVerificationMethod(method);
+    setStatus("idle");
+    setError(null);
+    setIsOpen(false);
+    setRpContext(null);
+    setReservation(null);
+    verificationRef.current = null;
+    onReservationChange?.(null);
   }, [onReservationChange]);
 
   const handleError = useCallback(
@@ -348,6 +366,19 @@ export function WorldIdGate({
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
         {error && <p className={errorClass}>{error}</p>}
+        <div className="grid w-full gap-2 sm:grid-cols-2">
+          {(["proof_of_human", "selfie_check"] as const).map((method) => (
+            <button
+              className={`rounded-xl border px-3 py-3 text-left text-xs transition ${verificationMethod === method ? "border-aurora-500 bg-aurora-500/10 text-white" : "border-white/10 bg-black/10 text-slate-300 hover:border-aurora-500/60"}`}
+              key={method}
+              onClick={() => selectVerificationMethod(method)}
+              type="button"
+            >
+              <span className="block font-semibold">{method === "selfie_check" ? copy.methods.selfieTitle : copy.methods.humanTitle}</span>
+              <span className="mt-1 block opacity-75">{method === "selfie_check" ? copy.methods.selfieDescription : copy.methods.humanDescription}</span>
+            </button>
+          ))}
+        </div>
         {status === "verified" ? (
           <p className="text-sm font-semibold text-emerald-300">{copy.statuses.verified}</p>
         ) : (
@@ -367,7 +398,7 @@ export function WorldIdGate({
             app_id={worldAppId}
             action={RISKA_WORLD_ID_POLICY_ACTION}
             rp_context={rpContext}
-            allow_legacy_proofs={environment === "testnet"}
+            allow_legacy_proofs={environment === "testnet" || verificationMethod === "selfie_check"}
             preset={worldIdPreset}
             environment={worldIdEnvironment}
             handleVerify={handleVerify}
@@ -389,6 +420,20 @@ export function WorldIdGate({
           </p>
           <h4 className="mt-2 text-lg font-semibold">{copy.heading}</h4>
           <p className={descriptionClass}>{copy.description}</p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {(["proof_of_human", "selfie_check"] as const).map((method) => (
+            <button
+              className={`rounded-xl border px-3 py-3 text-left text-xs transition ${verificationMethod === method ? (isLight ? "border-[#26342d] bg-[#e8f0e8] text-[#17231e]" : "border-aurora-500 bg-aurora-500/10 text-white") : (isLight ? "border-[#dce4d8] bg-white text-[#516159] hover:border-[#8aa08e]" : "border-white/10 bg-black/10 text-slate-300 hover:border-aurora-500/60")}`}
+              key={method}
+              onClick={() => selectVerificationMethod(method)}
+              type="button"
+            >
+              <span className="block font-semibold">{method === "selfie_check" ? copy.methods.selfieTitle : copy.methods.humanTitle}</span>
+              <span className="mt-1 block opacity-75">{method === "selfie_check" ? copy.methods.selfieDescription : copy.methods.humanDescription}</span>
+            </button>
+          ))}
         </div>
 
         <div className="space-y-2 text-sm">
@@ -426,7 +471,7 @@ export function WorldIdGate({
           app_id={worldAppId}
           action={RISKA_WORLD_ID_POLICY_ACTION}
           rp_context={rpContext}
-          allow_legacy_proofs={environment === "testnet"}
+          allow_legacy_proofs={environment === "testnet" || verificationMethod === "selfie_check"}
           preset={worldIdPreset}
           environment={worldIdEnvironment}
           handleVerify={handleVerify}
